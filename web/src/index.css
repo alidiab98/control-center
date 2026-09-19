@@ -1,1 +1,53 @@
 @import 'tailwindcss';
+
+/* Design tokens, SPEC section 4. Components use these by name only, never raw hex. */
+@theme {
+  --color-bg: #121418;
+  --color-rail: #15181d;
+  --color-panel: #1a1d23;
+  --color-panel-2: #20242b;
+  --color-term: #0c0e11;
+  --color-border: #2c313a;
+  --color-border-strong: #3a404b;
+  --color-text: #e8e6e1;
+  --color-text-2: #c9cbd1;
+  --color-muted: #a3a6ad;
+  --color-attention: #e3a53f;
+  --color-attention-ink: #1a1408;
+  --color-ok: #56bfae;
+  --color-idle: #6b707a;
+
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-bubble: 12px;
+
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  /* Tailwind v4 defaults every border to currentColor; the design wants the token. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-attention);
+    outline-offset: 2px;
+  }
+}
