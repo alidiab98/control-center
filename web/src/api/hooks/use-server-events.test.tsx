@@ -1,4 +1,4 @@
-import type { AgentSession, QueueItem, ServerEvent, TgChat } from '@control-center/shared'
+import type { AgentSession, QueueItem, ServerEvent, Task, TgChat } from '@control-center/shared'
 import { QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -62,6 +62,67 @@ describe('applyServerEvent', () => {
     const agents = queryClient.getQueryData<AgentSession[]>(queryKeys.agents)
     expect(agents).toHaveLength(1)
     expect(agents?.[0]?.lastActivity).toBe('running the test suite')
+  })
+
+  it('updates the by-key lookup, which holds one task and not a list', () => {
+    const queryClient = createQueryClient()
+    const task: Task = {
+      id: 'task-st-412',
+      projectId: 'prj-transcribe',
+      key: 'ST-412',
+      title: 'Export fails on files over 2 hours',
+      description: '',
+      status: 'in_progress',
+      priority: 'high',
+      assignee: 'you',
+      branch: null,
+      worktreePath: null,
+      trackedSeconds: 0,
+      origin: { kind: 'tracker' },
+      updatedAt: NOW.toISOString(),
+    }
+    const byKey = queryKeys.taskByKey('prj-transcribe', 'ST-412')
+    queryClient.setQueryData<Task | null>(byKey, task)
+    queryClient.setQueryData<Task[]>(queryKeys.tasks('prj-transcribe'), [task])
+
+    expect(() => {
+      applyServerEvent(queryClient, { type: 'task.updated', task: { ...task, status: 'review' } })
+    }).not.toThrow()
+
+    expect(queryClient.getQueryData<Task | null>(byKey)).toMatchObject({
+      key: 'ST-412',
+      status: 'review',
+    })
+    expect(queryClient.getQueryData<Task[]>(queryKeys.tasks('prj-transcribe'))).toHaveLength(1)
+    expect(queryClient.getQueryData<Task>(queryKeys.task(task.id))?.status).toBe('review')
+  })
+
+  it('leaves a by-key entry for another task alone', () => {
+    const queryClient = createQueryClient()
+    const other: Task = {
+      id: 'task-st-398',
+      projectId: 'prj-transcribe',
+      key: 'ST-398',
+      title: 'Retry queue for failed jobs',
+      description: '',
+      status: 'in_progress',
+      priority: 'normal',
+      assignee: 'you',
+      branch: null,
+      worktreePath: null,
+      trackedSeconds: 0,
+      origin: { kind: 'tracker' },
+      updatedAt: NOW.toISOString(),
+    }
+    const byKey = queryKeys.taskByKey('prj-transcribe', 'ST-398')
+    queryClient.setQueryData<Task | null>(byKey, other)
+
+    applyServerEvent(queryClient, {
+      type: 'task.updated',
+      task: { ...other, id: 'task-st-412', key: 'ST-412', status: 'review' },
+    })
+
+    expect(queryClient.getQueryData<Task | null>(byKey)).toMatchObject({ key: 'ST-398' })
   })
 
   it('updates a chat and writes stats and the deploy slot straight through', () => {

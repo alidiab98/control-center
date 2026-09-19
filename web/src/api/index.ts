@@ -44,5 +44,5 @@ export {
   useTimeline,
 } from './hooks/use-tasks.js'
 export { useMessages, useUnreadCount, useWorkFolderChats } from './hooks/use-telegram.js'
-export { useMarkRead, useSendMessage } from './hooks/use-telegram-actions.js'
+export { useLoadOlderMessages, useMarkRead, useSendMessage } from './hooks/use-telegram-actions.js'
 export type { SendMessageVariables } from './hooks/use-telegram-actions.js'

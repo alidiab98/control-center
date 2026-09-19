@@ -50,6 +50,10 @@ export function applyServerEvent(queryClient: QueryClient, event: ServerEvent): 
       queryClient.setQueriesData<Task[]>({ queryKey: ['tasks'] }, (current) =>
         current === undefined ? current : replaceById(current, event.task),
       )
+      // Holds a single task, so it needs its own updater rather than the list one.
+      queryClient.setQueriesData<Task | null>({ queryKey: ['task-by-key'] }, (current) =>
+        current?.id === event.task.id ? event.task : current,
+      )
       return
     }
     case 'timeline.added': {

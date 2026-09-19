@@ -16,6 +16,7 @@ export function useTransitionTask(taskId: ID | undefined) {
         queryClient.invalidateQueries({ queryKey: queryKeys.allowedTransitions(taskId) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.timeline(taskId) }),
         queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+        queryClient.invalidateQueries({ queryKey: ['task-by-key'] }),
       ])
     },
   })
@@ -44,6 +45,7 @@ export function useCreateTaskFromMessage() {
       api.createTaskFromMessage(chatId, messageId),
     onSettled: async (task) => {
       await queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      await queryClient.invalidateQueries({ queryKey: ['task-by-key'] })
       if (task !== undefined) {
         await queryClient.invalidateQueries({ queryKey: queryKeys.linkedMessages(task.id) })
       }

@@ -1,6 +1,6 @@
 # F0 — scaffold: report
 
-Date: 2026-09-19. Branch: `main`. Commits: six, each one green before the next.
+Date: 2026-09-19. Branch: `main`. Commits: eight, each one green before the next.
 
 ## What was built
 
@@ -53,6 +53,8 @@ control-center/
 │  │  └─ telegram.png
 │  ├─ prompts/
 │  │  └─ F0-scaffold.md
+│  ├─ reports/
+│  │  └─ F0-report.md
 │  ├─ decisions.md
 │  └─ SPEC.md
 ├─ e2e/
@@ -195,43 +197,91 @@ control-center/
 ## Verification
 
 All four commands were run from a clean tree, in this order, and all four passed.
+This is the captured output, unedited apart from stripping terminal colour codes.
 
 ```
 $ npm run typecheck
+
+> control-center@0.0.0 typecheck
+> npm run typecheck --workspaces --if-present
+
+
 > @control-center/shared@0.0.0 typecheck
 > tsc --noEmit -p tsconfig.json
+
+
 > @control-center/web@0.0.0 typecheck
 > tsc --noEmit -p tsconfig.json
+
+
 > @control-center/e2e@0.0.0 typecheck
 > tsc --noEmit -p tsconfig.json
 
+
 $ npm run lint
+
+> control-center@0.0.0 lint
 > eslint .
-(no output)
+
 
 $ npm run test
+
+> control-center@0.0.0 test
+> vitest run
+
+
  RUN  v5.0.1 /Users/alidiab/projects/control-center
- Test Files  11 passed (11)
-      Tests  78 passed (78)
-   Duration  778ms
+
+
+ Test Files  12 passed (12)
+      Tests  83 passed (83)
+   Start at  14:15:26
+   Duration  813ms (environment 60%, tests 13%, transform 10%, setup 9%, import 8%, worker 1%)
+
 
 $ npm run e2e
+
+> control-center@0.0.0 e2e
+> playwright test --config e2e/playwright.config.ts
+
+
 Running 17 tests using 9 workers
+
+  ✓   9 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › / loads its screen (559ms)
+  ✓   4 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram loads its screen (607ms)
+  ✓   5 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks/ST-412 loads its screen (613ms)
+  ✓   7 [chromium] › e2e/tests/counters.spec.ts:23:1 › a counter falls back to a marker when its call fails (615ms)
+  ✓   8 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /agents says it is not built yet (616ms)
+  ✓   2 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks loads its screen (710ms)
+  ✓   6 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /deploy says it is not built yet (710ms)
+  ✓   3 [chromium] › e2e/tests/counters.spec.ts:14:1 › sidebar counters match the fixtures (744ms)
+  ✓   1 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram/chat-dev-team loads its screen (775ms)
+  ✓  10 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /search says it is not built yet (390ms)
+  ✓  11 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /reports says it is not built yet (403ms)
+  ✓  12 [chromium] › e2e/tests/navigation.spec.ts:38:3 › routes › an unknown address explains itself (402ms)
+  ✓  14 [chromium] › e2e/tests/shell.spec.ts:11:3 › app shell › renders the brand, the nav and the dev slot (504ms)
+  ✓  13 [chromium] › e2e/tests/navigation.spec.ts:44:3 › routes › clicking through the nav keeps the shell in place (550ms)
+  ✓  15 [chromium] › e2e/tests/shell.spec.ts:32:3 › app shell › shows the home top bar, inert until later milestones (476ms)
+  ✓  17 [chromium] › e2e/tests/shell.spec.ts:44:3 › app shell › is operable from the keyboard (469ms)
+  ✓  16 [chromium] › e2e/tests/shell.spec.ts:39:3 › app shell › renders the error state when a call is forced to fail (624ms)
+
   17 passed (2.2s)
 ```
 
 Unit tests cover the schemas, the formatters, the UI primitives, the fixtures against the
-schemas, the mock's behaviour (including failure injection and unsubscribe) and the event
-reconciler including `resync`. The 17 Playwright tests cover the shell, all seven nav routes,
+schemas, the mock's behaviour (including failure injection and unsubscribe), optimistic
+sending with rollback, and the event reconciler including `resync`. The 17 Playwright tests cover the shell, all seven nav routes,
 the four "Not built yet" screens, an unknown address, keyboard navigation, the error state
 under `?mockFail=` and the counters matching the fixtures.
 
-Two checks were run by hand and are not part of the suite:
+Three checks were run by hand and are not part of the suite:
 
 - Live mode: with `?mock=live`, the Telegram counter moved from 7 to 8 about 50 seconds in,
   with no reload, driven by the simulator.
 - `node-pty` 1.1.0 on Node 26.7.0: installs from its bundled arm64 prebuild and spawns a pty.
   Two caveats for F4 are recorded in `docs/decisions.md`.
+- The lint guard behind CLAUDE.md rule 3: a throwaway component under `features/home/` that
+  imported the mock was rejected by `no-restricted-imports`, then deleted.
 
 ## Deviations from the task text
 
@@ -249,6 +299,16 @@ Two checks were run by hand and are not part of the suite:
    to F0, so it sits in `web/src/app/` and wraps the home route. F1 owns only the page below it.
 5. **Docs housekeeping.** The task prompt moved to `docs/prompts/F0-scaffold.md` and SPEC
    section 4 now names the real screenshot files. Both were approved.
+
+## One bug found and fixed after the first green run
+
+A review pass caught that `useTaskByKey` cached a single task under the `tasks` key prefix,
+while `applyServerEvent` applied a list updater to everything under that prefix. Opening a task
+and then transitioning it would have thrown inside the event handler, in the layer F3 is
+promised it never has to touch. The by-key lookup now has its own cache root, the reconciler
+updates it with a single-value updater, and two regression tests cover both the matching and
+the non-matching task. No test had caught it because none seeded a by-key entry before firing
+`task.updated`.
 
 ## Toolchain fallbacks
 
@@ -274,6 +334,25 @@ Three things had to be adjusted, none of them a version change:
 4. **Simulator cadence.** It stops when nothing is subscribed and caps the queue at nine items,
    so a session left open overnight does not accumulate hundreds of entries. Neither rule is in
    the spec.
+5. **`formatDayLabel(date, now = new Date())` takes its reference time second and defaults it.**
+   That matches the signature you asked for and is pure whenever both arguments are passed,
+   which is what the tests and any deterministic screen should do. The other formatters take
+   `now` first.
+6. **"New agent" and the command input are the only inert controls.** Everything else on the
+   screen is wired to real data.
+
+## Two `shared/` changes I propose but did not make
+
+Both are things F1 and F2 will hit early. Neither is committed (CLAUDE.md rule 4).
+
+1. **Automations today (SPEC section 8.2).** The home screen lists automations from timeline
+   events "flagged as automation", but `TimelineEvent` has no such flag and `getTimeline` is
+   per task, so F1 cannot gather them across tasks. Proposal: add `automation: boolean` to
+   `TimelineEvent` and `getAutomationsToday(): Promise<TimelineEvent[]>` to `ApiClient`.
+   Without it, F1 has to fake the list or call `getTimeline` once per task.
+2. **Nothing else is missing.** `getMessages(chatId, beforeId)` needed no contract change: the
+   `useLoadOlderMessages` hook now pages older history into the same cache entry the live
+   messages land in, so F2's scroll-up behaviour is covered inside its own folder.
 
 ## Ready for F1, F2 and F3
 

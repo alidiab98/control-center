@@ -42,7 +42,7 @@ export function useTaskByKey(key: string | undefined): UseQueryResult<Task | nul
   const projectId = project.data?.id
 
   return useQuery({
-    queryKey: [...queryKeys.tasks(projectId ?? 'unknown'), 'by-key', key ?? ''],
+    queryKey: queryKeys.taskByKey(projectId ?? 'unknown', key ?? ''),
     queryFn: async () => {
       const tasks = taskSchema.array().parse(await api.getTasks(projectId ?? ''))
       return tasks.find((task) => task.key === key) ?? null

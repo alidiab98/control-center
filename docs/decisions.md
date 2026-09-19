@@ -34,6 +34,7 @@ One line per decision. Dependencies are pinned to exact versions (CLAUDE.md rule
 | eslint-plugin-react-refresh                          | 0.5.7                         | Keeps fast refresh working (warn level).                                                                                                                                                 |
 | globals                                              | 17.12.0                       | Browser/node global sets for the flat config.                                                                                                                                            |
 | prettier                                             | 3.9.8                         | Formatting. No `eslint-config-prettier`: ESLint core and typescript-eslint no longer ship formatting rules, so there is nothing to disable.                                              |
+| @types/react, @types/react-dom                       | 19.3.0                        | Required peers of `@testing-library/react`; JSX does not typecheck without them.                                                                                                         |
 | @types/node                                          | 26.6.2                        | Types for config files and the e2e workspace.                                                                                                                                            |
 
 No class-name helper library. `web/src/ui/cn.ts` is a five-line local join, which avoids a
@@ -48,6 +49,8 @@ dependency on `clsx`/`tailwind-merge` for the small number of variants in this p
 | Root `tsconfig.json` covers only `eslint.config.js` and `vitest.config.ts`             | Type-aware linting needs every linted file inside a project. Workspace files still resolve to their own workspace tsconfig.                         |
 | `shared` is consumed as TypeScript source (`exports: "./src/index.ts"`, no build step) | One less build to keep in sync; Vite transpiles the linked workspace source and `tsc` resolves it through package exports.                          |
 | e2e runs against the Vite dev server, not a production build                           | Faster feedback, and `?mock=static` already removes the nondeterminism a build would not.                                                           |
+| The by-key task lookup has its own cache root (`task-by-key`)                          | It holds one task, not a list. Under the `tasks` prefix a `task.updated` event applied the list updater to it and threw.                            |
+| Older messages page into the same cache entry as live ones                             | One entry per chat means history loaded on scroll-up and messages arriving live cannot diverge.                                                     |
 
 ## Setup on a fresh machine
 

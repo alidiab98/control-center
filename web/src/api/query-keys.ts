@@ -9,6 +9,8 @@ export const queryKeys = {
   deploySlot: ['deploy-slot'] as const,
   tasks: (projectId: ID) => ['tasks', projectId] as const,
   task: (taskId: ID) => ['task', taskId] as const,
+  /** Own root: routes address tasks by key, and this entry holds a single task, not a list. */
+  taskByKey: (projectId: ID, key: string) => ['task-by-key', projectId, key] as const,
   timeline: (taskId: ID) => ['timeline', taskId] as const,
   allowedTransitions: (taskId: ID) => ['allowed-transitions', taskId] as const,
   linkedMessages: (taskId: ID) => ['linked-messages', taskId] as const,
