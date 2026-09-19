@@ -1,0 +1,81 @@
+import type { QueueItem } from '@control-center/shared'
+import { AGENT_IDS, CHAT_IDS, MESSAGE_IDS, TASK_IDS } from './ids.js'
+import { minutesAgo } from './time.js'
+
+/** The six "Needs you" items, in the order of the home screenshot (lower priority sorts first). */
+export function createQueue(now: Date): QueueItem[] {
+  return [
+    {
+      id: 'queue-permission-412',
+      kind: 'permission',
+      createdAt: minutesAgo(now, 2),
+      taskId: TASK_IDS.st412,
+      agentId: AGENT_IDS.st412,
+      chatId: null,
+      messageId: null,
+      title: 'Agent wants to run a migration',
+      detail: 'php yii migrate/up --interactive=0 · local DB',
+      priority: 10,
+    },
+    {
+      id: 'queue-plan-420',
+      kind: 'plan',
+      createdAt: minutesAgo(now, 6),
+      taskId: TASK_IDS.st420,
+      agentId: AGENT_IDS.st420,
+      chatId: null,
+      messageId: null,
+      title: 'Plan ready for approval',
+      detail: '5 steps · touches 3 files · adds 1 migration',
+      priority: 20,
+    },
+    {
+      id: 'queue-mention-dev',
+      kind: 'mention',
+      createdAt: minutesAgo(now, 11),
+      taskId: null,
+      agentId: null,
+      chatId: CHAT_IDS.dev,
+      messageId: MESSAGE_IDS.devExportFails,
+      title: 'Дмитрий → you',
+      detail: 'посмотри, пожалуйста — экспорт падает на длинных файлах',
+      priority: 30,
+    },
+    {
+      id: 'queue-review-405',
+      kind: 'review',
+      createdAt: minutesAgo(now, 18),
+      taskId: TASK_IDS.st405,
+      agentId: AGENT_IDS.st405,
+      chatId: null,
+      messageId: null,
+      title: 'Diff ready · tests passed',
+      detail: '+124 −31 · auto-review: 1 risk (N+1 query in ExportService)',
+      priority: 40,
+    },
+    {
+      id: 'queue-question-417',
+      kind: 'question',
+      createdAt: minutesAgo(now, 25),
+      taskId: TASK_IDS.st417,
+      agentId: AGENT_IDS.st417,
+      chatId: null,
+      messageId: null,
+      title: 'Keep the old endpoint for backward compatibility?',
+      detail: 'Agent paused until you answer',
+      priority: 50,
+    },
+    {
+      id: 'queue-stalled-409',
+      kind: 'stalled',
+      createdAt: minutesAgo(now, 41),
+      taskId: TASK_IDS.st409,
+      agentId: AGENT_IDS.st409,
+      chatId: null,
+      messageId: null,
+      title: 'No activity for 40 min, no Stop event',
+      detail: 'Last tool call: running test suite',
+      priority: 60,
+    },
+  ]
+}

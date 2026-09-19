@@ -79,3 +79,37 @@ export interface ApiClient {
 
 /** Method names of the contract, used by the mock's failure injection (`?mockFail=`). */
 export type ApiMethodName = keyof ApiClient
+
+export const API_METHOD_NAMES = [
+  'getProjects',
+  'getQueue',
+  'getAgents',
+  'getStats',
+  'getDeploySlot',
+  'resolvePermission',
+  'resolvePlan',
+  'answerQuestion',
+  'sendPrompt',
+  'restartAgent',
+  'startAgent',
+  'getTasks',
+  'getTask',
+  'getTimeline',
+  'getAllowedTransitions',
+  'transitionTask',
+  'addTrackerComment',
+  'getLinkedMessages',
+  'createTaskFromMessage',
+  'getWorkFolderChats',
+  'getMessages',
+  'sendMessage',
+  'markRead',
+  'subscribe',
+] as const satisfies readonly ApiMethodName[]
+
+export const apiMethodNameSchema = z.enum(API_METHOD_NAMES)
+
+type UnlistedApiMethod = Exclude<ApiMethodName, (typeof API_METHOD_NAMES)[number]>
+
+/** Compile-time guard: adding a method to ApiClient without listing it above breaks here. */
+export const ALL_API_METHODS_LISTED: [UnlistedApiMethod] extends [never] ? true : never = true
