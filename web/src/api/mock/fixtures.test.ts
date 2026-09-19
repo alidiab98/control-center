@@ -70,6 +70,16 @@ describe('fixtures reproduce the design screenshots', () => {
     for (const message of fixtures.messages) expect(chatIds).toContain(message.chatId)
   })
 
+  it('flags exactly the three automations the home screenshot lists', () => {
+    const automations = fixtures.timeline.filter((event) => event.automation)
+
+    expect(automations.map((event) => event.text)).toEqual([
+      'ST-405 auto-review finished, 1 risk flagged',
+      'ST-398 moved to In progress when its agent started',
+      "Standup draft ready from today's events",
+    ])
+  })
+
   it('tracks 4h 12m today and reports seven agents', () => {
     expect(fixtures.stats.trackedTodaySeconds).toBe(15_120)
     expect(fixtures.stats.agentCount).toBe(fixtures.agents.length)

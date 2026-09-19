@@ -52,6 +52,42 @@ describe('reads', () => {
     ])
   })
 
+  it('returns todays automations oldest first, and nothing a person did', async () => {
+    const { client } = setup()
+    const automations = await client.getAutomationsToday()
+
+    expect(automations.map((event) => event.text)).toEqual([
+      'ST-405 auto-review finished, 1 risk flagged',
+      'ST-398 moved to In progress when its agent started',
+      "Standup draft ready from today's events",
+    ])
+    expect(automations.every((event) => event.automation)).toBe(true)
+  })
+
+  it('leaves out automations from earlier days', async () => {
+    const { client, store } = setup()
+    store.data.timeline.push({
+      id: 'tl-old',
+      taskId: TASK_IDS.st398,
+      at: new Date(NOW.getTime() - 48 * 60 * 60 * 1000).toISOString(),
+      text: 'Nightly cleanup ran',
+      attention: false,
+      automation: true,
+    })
+
+    const texts = (await client.getAutomationsToday()).map((event) => event.text)
+    expect(texts).not.toContain('Nightly cleanup ran')
+  })
+
+  it('records a Tracker transition as an automation and a comment as not', async () => {
+    const { client, events } = setup()
+    await client.transitionTask(TASK_IDS.st412, 'review')
+    await client.addTrackerComment(TASK_IDS.st412, 'checked on dev')
+
+    const added = events.filter((event) => event.type === 'timeline.added')
+    expect(added.map((event) => event.event.automation)).toEqual([true, false])
+  })
+
   it('lists only the transitions Tracker allows', async () => {
     const { client } = setup()
     expect(await client.getAllowedTransitions(TASK_IDS.st412)).toEqual(['review', 'open'])
