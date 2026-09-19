@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+coverage/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Local env
+.env
+.env.*
+!.env.example

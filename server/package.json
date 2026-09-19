@@ -1,0 +1,7 @@
+{
+  "name": "@control-center/server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Empty until F4: Fastify + ws + node-pty terminal bridge"
+}

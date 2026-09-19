@@ -1,0 +1,31 @@
+{
+  "name": "@control-center/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Control Center web app: React + Vite + Tailwind, talking to the ApiClient contract",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@control-center/shared": "*",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@tanstack/react-query": "5.103.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.4",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "tailwindcss": "4.3.3",
+    "vite": "8.3.0"
+  }
+}

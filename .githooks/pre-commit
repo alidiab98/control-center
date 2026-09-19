@@ -1,0 +1,10 @@
+#!/bin/sh
+# Enabled by the root "prepare" script: git config core.hooksPath .githooks
+# Keeps CLAUDE.md rule 9 honest: never commit red.
+set -e
+
+echo "pre-commit: typecheck"
+npm run --silent typecheck
+
+echo "pre-commit: lint"
+npm run --silent lint

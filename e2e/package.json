@@ -1,0 +1,10 @@
+{
+  "name": "@control-center/e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Playwright end-to-end tests, run against the mock in static mode",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}
