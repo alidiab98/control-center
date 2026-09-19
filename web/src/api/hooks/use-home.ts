@@ -4,6 +4,7 @@ import {
   projectSchema,
   queueItemSchema,
   statsSchema,
+  timelineEventSchema,
 } from '@control-center/shared'
 import type { Project } from '@control-center/shared'
 import { useQuery } from '@tanstack/react-query'
@@ -63,5 +64,18 @@ export function useDeploySlot() {
   return useQuery({
     queryKey: queryKeys.deploySlot,
     queryFn: async () => deploySlotSchema.parse(await api.getDeploySlot()),
+  })
+}
+
+/**
+ * "Automations today" on the home screen: timeline events the system raised itself, across
+ * every task, since midnight. Live events with `automation: true` are appended by the
+ * reconciler, so the list grows without a refetch.
+ */
+export function useAutomationsToday() {
+  const api = useApi()
+  return useQuery({
+    queryKey: queryKeys.automationsToday,
+    queryFn: async () => timelineEventSchema.array().parse(await api.getAutomationsToday()),
   })
 }

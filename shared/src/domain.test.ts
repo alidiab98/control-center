@@ -6,6 +6,7 @@ import {
   taskSchema,
   tgChatSchema,
   tgMessageSchema,
+  timelineEventSchema,
 } from './domain.js'
 
 const iso = '2026-09-19T10:02:00.000Z'
@@ -166,5 +167,26 @@ describe('deploySlotSchema', () => {
   it('accepts an empty slot', () => {
     const slot = { currentTaskKey: null, deployedAt: null, nextTaskKey: null }
     expect(deploySlotSchema.parse(slot).currentTaskKey).toBeNull()
+  })
+})
+
+describe('timelineEventSchema', () => {
+  const event = {
+    id: 'tl-1',
+    taskId: 't-412',
+    at: iso,
+    text: 'ST-405 auto-review finished, 1 risk flagged',
+    attention: true,
+    automation: true,
+  }
+
+  it('accepts an automation entry', () => {
+    expect(timelineEventSchema.parse(event).automation).toBe(true)
+  })
+
+  it('rejects an entry without the automation flag', () => {
+    const { automation, ...rest } = event
+    expect(automation).toBe(true)
+    expect(timelineEventSchema.safeParse(rest).success).toBe(false)
   })
 })

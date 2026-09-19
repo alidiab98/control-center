@@ -7,6 +7,7 @@ export const queryKeys = {
   agents: ['agents'] as const,
   stats: ['stats'] as const,
   deploySlot: ['deploy-slot'] as const,
+  automationsToday: ['automations-today'] as const,
   tasks: (projectId: ID) => ['tasks', projectId] as const,
   task: (taskId: ID) => ['task', taskId] as const,
   /** Own root: routes address tasks by key, and this entry holds a single task, not a list. */

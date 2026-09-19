@@ -21,6 +21,7 @@ export { useNavCounters } from './hooks/use-counters.js'
 export type { CounterState, NavCounters } from './hooks/use-counters.js'
 export {
   useAgents,
+  useAutomationsToday,
   useCurrentProject,
   useDeploySlot,
   useProjects,

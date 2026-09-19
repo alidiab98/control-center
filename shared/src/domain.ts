@@ -122,6 +122,8 @@ export const timelineEventSchema = z.object({
   at: isoDateSchema,
   text: z.string(),
   attention: z.boolean(),
+  /** Something the system did on its own, as opposed to a step you took. */
+  automation: z.boolean(),
 })
 export type TimelineEvent = z.infer<typeof timelineEventSchema>
 

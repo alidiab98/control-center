@@ -9,6 +9,11 @@ import type {
 import { createFixtures } from './fixtures/index.js'
 import type { MockData } from './fixtures/index.js'
 
+export interface TimelineFlags {
+  attention?: boolean
+  automation?: boolean
+}
+
 export interface MockStoreOptions {
   /** Frozen reference time; fixtures and generated timestamps hang off it in static mode. */
   now: Date
@@ -26,7 +31,7 @@ export interface MockStore {
   updateAgent: (agentId: string, patch: Partial<AgentSession>) => AgentSession | undefined
   updateTask: (taskId: string, patch: Partial<Task>) => Task | undefined
   removeQueueItems: (predicate: (itemId: string) => boolean) => void
-  addTimelineEvent: (taskId: string, text: string, attention?: boolean) => TimelineEvent
+  addTimelineEvent: (taskId: string, text: string, flags?: TimelineFlags) => TimelineEvent
 }
 
 export function createMockStore(options: MockStoreOptions): MockStore {
@@ -85,13 +90,14 @@ export function createMockStore(options: MockStoreOptions): MockStore {
       for (const item of removed) emit({ type: 'queue.removed', itemId: item.id })
     },
 
-    addTimelineEvent: (taskId, text, attention = false) => {
+    addTimelineEvent: (taskId, text, flags = {}) => {
       const event: TimelineEvent = {
         id: store.nextId('tl'),
         taskId,
         at: clock().toISOString(),
         text,
-        attention,
+        attention: flags.attention ?? false,
+        automation: flags.automation ?? false,
       }
       data.timeline.push(event)
       emit({ type: 'timeline.added', event })

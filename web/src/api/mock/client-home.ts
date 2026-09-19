@@ -9,6 +9,7 @@ type HomeClient = Pick<
   | 'getAgents'
   | 'getStats'
   | 'getDeploySlot'
+  | 'getAutomationsToday'
   | 'resolvePermission'
   | 'resolvePlan'
   | 'answerQuestion'
@@ -52,6 +53,16 @@ export function createHomeClient(store: MockStore, timing: MockTiming): HomeClie
     getAgents: () => timing.settle('getAgents', () => [...data.agents]),
     getStats: () => timing.settle('getStats', () => ({ ...data.stats })),
     getDeploySlot: () => timing.settle('getDeploySlot', () => ({ ...data.deploySlot })),
+
+    getAutomationsToday: () =>
+      timing.settle('getAutomationsToday', () => {
+        const startOfToday = new Date(store.clock())
+        startOfToday.setHours(0, 0, 0, 0)
+
+        return data.timeline
+          .filter((event) => event.automation && Date.parse(event.at) >= startOfToday.getTime())
+          .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+      }),
 
     resolvePermission: (agentId, decision) =>
       timing.settle('resolvePermission', () => {
@@ -131,7 +142,7 @@ export function createHomeClient(store: MockStore, timing: MockTiming): HomeClie
 
         data.stats = { ...data.stats, agentCount: data.agents.length }
         store.emit({ type: 'stats.updated', stats: data.stats })
-        store.addTimelineEvent(taskId, `Agent started for ${task.key}`)
+        store.addTimelineEvent(taskId, `Agent started for ${task.key}`, { automation: true })
         return agent
       }),
   }

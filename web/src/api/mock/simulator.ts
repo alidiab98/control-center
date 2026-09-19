@@ -39,7 +39,9 @@ export function createSimulator(store: MockStore): Simulator {
   }
 
   const addTimeline = (): void => {
-    store.addTimelineEvent(TASK_IDS.st412, 'Agent wrote a new test for long exports')
+    store.addTimelineEvent(TASK_IDS.st412, 'Agent wrote a new test for long exports', {
+      automation: true,
+    })
   }
 
   const incomingMessage = (): void => {

@@ -12,7 +12,14 @@ describe('serverEventSchema', () => {
   it('accepts a timeline addition', () => {
     const event = {
       type: 'timeline.added',
-      event: { id: 'e-1', taskId: 't-412', at: iso, text: 'Tests: 41 passed', attention: false },
+      event: {
+        id: 'e-1',
+        taskId: 't-412',
+        at: iso,
+        text: 'Tests: 41 passed',
+        attention: false,
+        automation: true,
+      },
     }
     expect(serverEventSchema.parse(event).type).toBe('timeline.added')
   })

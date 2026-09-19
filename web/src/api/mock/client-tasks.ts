@@ -62,7 +62,7 @@ export function createTaskClient(store: MockStore, timing: MockTiming): TaskClie
         }
         const next = store.updateTask(taskId, { status: to })
         if (next === undefined) throw notFound('task', taskId)
-        store.addTimelineEvent(taskId, `Tracker → ${to.replace('_', ' ')}`)
+        store.addTimelineEvent(taskId, `Tracker → ${to.replace('_', ' ')}`, { automation: true })
         return next
       }),
 

@@ -60,6 +60,11 @@ export function applyServerEvent(queryClient: QueryClient, event: ServerEvent): 
       queryClient.setQueryData<TimelineEvent[]>(queryKeys.timeline(event.event.taskId), (current) =>
         replaceById(current, event.event),
       )
+      if (event.event.automation) {
+        queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, (current) =>
+          current === undefined ? current : replaceById(current, event.event),
+        )
+      }
       return
     }
     case 'tg.message': {

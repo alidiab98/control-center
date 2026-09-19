@@ -48,6 +48,8 @@ export interface ApiClient {
   getAgents: () => Promise<AgentSession[]>
   getStats: () => Promise<Stats>
   getDeploySlot: () => Promise<DeploySlot>
+  /** Timeline events flagged as automation that happened today, across every task. */
+  getAutomationsToday: () => Promise<TimelineEvent[]>
 
   // agent actions
   resolvePermission: (agentId: ID, decision: PermissionDecision) => Promise<void>
@@ -86,6 +88,7 @@ export const API_METHOD_NAMES = [
   'getAgents',
   'getStats',
   'getDeploySlot',
+  'getAutomationsToday',
   'resolvePermission',
   'resolvePlan',
   'answerQuestion',
