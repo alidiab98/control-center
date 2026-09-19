@@ -43,6 +43,18 @@ export default defineConfig(
     },
   },
   {
+    // Node globals exist in web/tsconfig.json for vite.config.ts only; app code is browser code.
+    files: ['web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        { name: 'process', message: 'Browser code cannot read process; use import.meta.env.' },
+        { name: 'Buffer', message: 'Browser code cannot use Buffer.' },
+        { name: '__dirname', message: 'Browser code has no __dirname.' },
+      ],
+    },
+  },
+  {
     // CLAUDE.md rule 3: components never import mock data or fixtures.
     files: ['web/src/features/**/*.{ts,tsx}', 'web/src/ui/**/*.{ts,tsx}'],
     rules: {

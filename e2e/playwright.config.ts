@@ -2,7 +2,19 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url))
-const port = 5173
+
+/**
+ * CC_PORT lets three worktrees run their dev server and their Playwright suite at the same
+ * time. When it is set, an already-running server is never reused: each run starts and owns
+ * its own, so one worktree can never test another worktree's build.
+ */
+const rawPort = process.env.CC_PORT
+const port = rawPort === undefined || rawPort === '' ? 5173 : Number(rawPort)
+if (!Number.isInteger(port) || port < 1024 || port > 65_535) {
+  throw new Error(`CC_PORT must be an integer between 1024 and 65535, got "${String(rawPort)}"`)
+}
+
+const usingCustomPort = rawPort !== undefined && rawPort !== ''
 const baseURL = `http://127.0.0.1:${String(port)}`
 
 export default defineConfig({
@@ -27,7 +39,7 @@ export default defineConfig({
     command: `npm run dev --workspace @control-center/web -- --port ${String(port)} --strictPort`,
     cwd: repoRoot,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !usingCustomPort && !process.env.CI,
     timeout: 120_000,
   },
 })

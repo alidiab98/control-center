@@ -58,6 +58,22 @@ A dependency-free pre-commit hook in `.githooks/pre-commit` runs typecheck + lin
 It is enabled by the root `prepare` script (`git config core.hooksPath .githooks`),
 so a plain `npm install` wires it up.
 
+### `CC_PORT` — one port per worktree
+
+Parallel milestones run their own dev server and their own Playwright suite at the same time,
+so every worktree picks a port:
+
+```
+CC_PORT=5174 npm run dev     # F1 worktree
+CC_PORT=5175 npm run e2e     # F2 worktree
+```
+
+`CC_PORT` sets both the Vite dev server port and the Playwright `baseURL` and `webServer`.
+Default 5173. The port is strict: a collision fails with "Port NNNN is already in use" instead
+of quietly moving to the next one, and an unusable value fails with a message naming `CC_PORT`.
+When `CC_PORT` is set, Playwright never reuses a server that is already running, so a suite
+can only ever test the server it started.
+
 ## When you finish a task
 
 Reply with: what changed, what you tested and the result, anything you were unsure about,
