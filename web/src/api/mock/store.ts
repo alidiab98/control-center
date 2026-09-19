@@ -31,7 +31,7 @@ export interface MockStore {
   updateAgent: (agentId: string, patch: Partial<AgentSession>) => AgentSession | undefined
   updateTask: (taskId: string, patch: Partial<Task>) => Task | undefined
   removeQueueItems: (predicate: (itemId: string) => boolean) => void
-  addTimelineEvent: (taskId: string, text: string, flags?: TimelineFlags) => TimelineEvent
+  addTimelineEvent: (taskId: string | null, text: string, flags?: TimelineFlags) => TimelineEvent
 }
 
 export function createMockStore(options: MockStoreOptions): MockStore {

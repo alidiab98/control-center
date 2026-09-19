@@ -48,7 +48,10 @@ export function createTaskClient(store: MockStore, timing: MockTiming): TaskClie
 
     getTimeline: (taskId) =>
       timing.settle('getTimeline', () =>
-        data.timeline.filter((event) => event.taskId === taskId).sort(byTime),
+        // Events with a null taskId belong to no task, so they never appear here.
+        data.timeline
+          .filter((event) => event.taskId !== null && event.taskId === taskId)
+          .sort(byTime),
       ),
 
     getAllowedTransitions: (taskId) =>

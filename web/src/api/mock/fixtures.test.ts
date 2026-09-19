@@ -70,6 +70,14 @@ describe('fixtures reproduce the design screenshots', () => {
     for (const message of fixtures.messages) expect(chatIds).toContain(message.chatId)
   })
 
+  it('points every timeline event at a real task, or at no task at all', () => {
+    const taskIds = new Set(fixtures.tasks.map((task) => task.id))
+
+    for (const event of fixtures.timeline) {
+      if (event.taskId !== null) expect(taskIds).toContain(event.taskId)
+    }
+  })
+
   it('flags exactly the three automations the home screenshot lists', () => {
     const automations = fixtures.timeline.filter((event) => event.automation)
 
@@ -79,6 +87,9 @@ describe('fixtures reproduce the design screenshots', () => {
       "Standup draft ready from today's events",
     ])
     expect(fixtures.timeline.filter((event) => !event.automation).length).toBeGreaterThan(0)
+
+    const standup = automations.find((event) => event.text.startsWith('Standup'))
+    expect(standup?.taskId).toBeNull()
   })
 
   it('tracks 4h 12m today and reports seven agents', () => {

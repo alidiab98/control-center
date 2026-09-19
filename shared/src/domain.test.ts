@@ -184,6 +184,17 @@ describe('timelineEventSchema', () => {
     expect(timelineEventSchema.parse(event).automation).toBe(true)
   })
 
+  it('accepts an event that belongs to no task', () => {
+    const standup = { ...event, taskId: null, text: "Standup draft ready from today's events" }
+    expect(timelineEventSchema.parse(standup).taskId).toBeNull()
+  })
+
+  it('still rejects a missing taskId', () => {
+    const { taskId, ...rest } = event
+    expect(taskId).toBe('t-412')
+    expect(timelineEventSchema.safeParse(rest).success).toBe(false)
+  })
+
   it('rejects an entry without the automation flag', () => {
     const { automation, ...rest } = event
     expect(automation).toBe(true)

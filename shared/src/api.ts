@@ -48,7 +48,10 @@ export interface ApiClient {
   getAgents: () => Promise<AgentSession[]>
   getStats: () => Promise<Stats>
   getDeploySlot: () => Promise<DeploySlot>
-  /** Timeline events flagged as automation that happened today, across every task. */
+  /**
+   * Timeline events flagged as automation that happened today, newest first. Covers every
+   * task and includes events that belong to no task.
+   */
   getAutomationsToday: () => Promise<TimelineEvent[]>
 
   // agent actions
@@ -62,6 +65,7 @@ export interface ApiClient {
   // tasks
   getTasks: (projectId: ID) => Promise<Task[]>
   getTask: (taskId: ID) => Promise<Task>
+  /** Only events of this task; events with a null `taskId` are never included. */
   getTimeline: (taskId: ID) => Promise<TimelineEvent[]>
   getAllowedTransitions: (taskId: ID) => Promise<TrackerStatus[]>
   transitionTask: (taskId: ID, to: TrackerStatus) => Promise<Task>

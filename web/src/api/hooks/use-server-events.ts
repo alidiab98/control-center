@@ -38,6 +38,17 @@ const upsertIfLoaded = <T extends { id: string }>(
     : [...list, next]
 }
 
+/** Same, but new entries go to the front: the automations list reads newest first. */
+const prependIfLoaded = <T extends { id: string }>(
+  list: T[] | undefined,
+  next: T,
+): T[] | undefined => {
+  if (list === undefined) return undefined
+  return list.some((item) => item.id === next.id)
+    ? list.map((item) => (item.id === next.id ? next : item))
+    : [next, ...list]
+}
+
 /**
  * Applies one live event to the query cache. Exported so it can be unit tested without React,
  * and so the real WebSocket client can reuse it unchanged.
@@ -81,14 +92,18 @@ export function applyServerEvent(
       return
     }
     case 'timeline.added': {
-      queryClient.setQueryData<TimelineEvent[]>(queryKeys.timeline(event.event.taskId), (current) =>
-        upsertIfLoaded(current, event.event),
-      )
+      // A null taskId means the event belongs to no task, so no task timeline shows it.
+      if (event.event.taskId !== null) {
+        queryClient.setQueryData<TimelineEvent[]>(
+          queryKeys.timeline(event.event.taskId),
+          (current) => upsertIfLoaded(current, event.event),
+        )
+      }
       // The list is today's automations: a replayed or late event from another day belongs
       // to neither half of that phrase.
       if (event.event.automation && isSameLocalDay(event.event.at, now)) {
         queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, (current) =>
-          upsertIfLoaded(current, event.event),
+          prependIfLoaded(current, event.event),
         )
       }
       return

@@ -82,9 +82,9 @@ export function createTimeline(now: Date): TimelineEvent[] {
       automation: false,
     },
     {
-      // Not tied to one task; hung off the deployed task until TimelineEvent.taskId can be null.
+      // Belongs to no single task, which is what a null taskId is for.
       id: 'tl-standup-1',
-      taskId: TASK_IDS.st398,
+      taskId: null,
       at: minutesAgo(now, 8),
       text: "Standup draft ready from today's events",
       attention: false,

@@ -61,7 +61,7 @@ export function createHomeClient(store: MockStore, timing: MockTiming): HomeClie
 
         return data.timeline
           .filter((event) => event.automation && Date.parse(event.at) >= startOfToday.getTime())
-          .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+          .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
       }),
 
     resolvePermission: (agentId, decision) =>

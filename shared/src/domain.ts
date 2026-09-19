@@ -118,7 +118,8 @@ export type QueueItem = z.infer<typeof queueItemSchema>
 
 export const timelineEventSchema = z.object({
   id: idSchema,
-  taskId: idSchema,
+  /** Null for events that belong to no single task, such as the standup draft. */
+  taskId: idSchema.nullable(),
   at: isoDateSchema,
   text: z.string(),
   attention: z.boolean(),

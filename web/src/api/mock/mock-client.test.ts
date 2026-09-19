@@ -52,16 +52,29 @@ describe('reads', () => {
     ])
   })
 
-  it('returns todays automations oldest first, and nothing a person did', async () => {
+  it('returns todays automations newest first, and nothing a person did', async () => {
     const { client } = setup()
     const automations = await client.getAutomationsToday()
 
     expect(automations.map((event) => event.text)).toEqual([
-      'ST-405 auto-review finished, 1 risk flagged',
-      'ST-398 moved to In progress when its agent started',
       "Standup draft ready from today's events",
+      'ST-398 moved to In progress when its agent started',
+      'ST-405 auto-review finished, 1 risk flagged',
     ])
     expect(automations.every((event) => event.automation)).toBe(true)
+  })
+
+  it('includes task-less automations but keeps them out of every task timeline', async () => {
+    const { client } = setup()
+
+    const automations = await client.getAutomationsToday()
+    expect(automations.some((event) => event.taskId === null)).toBe(true)
+
+    for (const taskId of Object.values(TASK_IDS)) {
+      const timeline = await client.getTimeline(taskId)
+      expect(timeline.every((event) => event.taskId === taskId)).toBe(true)
+      expect(timeline.some((event) => event.text.startsWith('Standup'))).toBe(false)
+    }
   })
 
   it('leaves out automations from earlier days', async () => {
