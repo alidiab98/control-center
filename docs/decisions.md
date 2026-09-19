@@ -49,8 +49,14 @@ dependency on `clsx`/`tailwind-merge` for the small number of variants in this p
 | `shared` is consumed as TypeScript source (`exports: "./src/index.ts"`, no build step) | One less build to keep in sync; Vite transpiles the linked workspace source and `tsc` resolves it through package exports.                          |
 | e2e runs against the Vite dev server, not a production build                           | Faster feedback, and `?mock=static` already removes the nondeterminism a build would not.                                                           |
 
+## Setup on a fresh machine
+
+`npm install` wires the pre-commit hook through the `prepare` script. Playwright 1.63 needs
+Chromium revision 1243, so also run `npx playwright install chromium` once.
+
 ## Toolchain fallbacks
 
-None so far. Every pin above installed and ran green together on the walking skeleton
-(typecheck, lint, unit tests, Playwright). Per the F0 amendment, an incompatibility is resolved
-by dropping the offending tool one major version rather than patching around it, and recorded here.
+None. Every pin above installed and ran green together, through the walking skeleton and the
+finished milestone (typecheck, lint, 78 unit tests, 17 Playwright tests). Per the F0 amendment,
+an incompatibility is resolved by dropping the offending tool one major version rather than
+patching around it, and recorded here.
