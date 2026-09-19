@@ -18,7 +18,7 @@ export {
   useStartAgent,
 } from './hooks/use-agent-actions.js'
 export { useNavCounters } from './hooks/use-counters.js'
-export type { NavCounters } from './hooks/use-counters.js'
+export type { CounterState, NavCounters } from './hooks/use-counters.js'
 export {
   useAgents,
   useCurrentProject,
