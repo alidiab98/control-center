@@ -145,7 +145,7 @@ describe('applyServerEvent', () => {
       attention: false,
       automation: true,
     }
-    applyServerEvent(queryClient, { type: 'timeline.added', event: automation })
+    applyServerEvent(queryClient, { type: 'timeline.added', event: automation }, NOW)
 
     expect(queryClient.getQueryData<TimelineEvent[]>(queryKeys.automationsToday)).toHaveLength(1)
     expect(
@@ -157,17 +157,21 @@ describe('applyServerEvent', () => {
     const queryClient = createQueryClient()
     queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, [])
 
-    applyServerEvent(queryClient, {
-      type: 'timeline.added',
-      event: {
-        id: 'tl-manual',
-        taskId: 'task-st-412',
-        at: NOW.toISOString(),
-        text: 'Permission allowed by you',
-        attention: false,
-        automation: false,
+    applyServerEvent(
+      queryClient,
+      {
+        type: 'timeline.added',
+        event: {
+          id: 'tl-manual',
+          taskId: 'task-st-412',
+          at: NOW.toISOString(),
+          text: 'Permission allowed by you',
+          attention: false,
+          automation: false,
+        },
       },
-    })
+      NOW,
+    )
 
     expect(queryClient.getQueryData<TimelineEvent[]>(queryKeys.automationsToday)).toHaveLength(0)
   })
@@ -175,19 +179,54 @@ describe('applyServerEvent', () => {
   it('does not seed the automations list before it has been loaded', () => {
     const queryClient = createQueryClient()
 
-    applyServerEvent(queryClient, {
-      type: 'timeline.added',
-      event: {
-        id: 'tl-early',
-        taskId: 'task-st-412',
-        at: NOW.toISOString(),
-        text: 'Tests: 41 passed',
-        attention: false,
-        automation: true,
+    applyServerEvent(
+      queryClient,
+      {
+        type: 'timeline.added',
+        event: {
+          id: 'tl-early',
+          taskId: 'task-st-412',
+          at: NOW.toISOString(),
+          text: 'Tests: 41 passed',
+          attention: false,
+          automation: true,
+        },
       },
-    })
+      NOW,
+    )
 
     expect(queryClient.getQueryData(queryKeys.automationsToday)).toBeUndefined()
+  })
+
+  it("keeps a replayed automation from another day out of today's list", () => {
+    const queryClient = createQueryClient()
+    queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, [])
+
+    applyServerEvent(
+      queryClient,
+      {
+        type: 'timeline.added',
+        event: {
+          id: 'tl-old',
+          taskId: 'task-st-398',
+          at: new Date(NOW.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          text: 'Nightly cleanup ran',
+          attention: false,
+          automation: true,
+        },
+      },
+      NOW,
+    )
+
+    expect(queryClient.getQueryData<TimelineEvent[]>(queryKeys.automationsToday)).toHaveLength(0)
+  })
+
+  it('leaves a list that has not been fetched alone, rather than seeding it', () => {
+    const queryClient = createQueryClient()
+
+    applyServerEvent(queryClient, { type: 'queue.added', item: queueItem('q-9', 30) }, NOW)
+
+    expect(queryClient.getQueryData(queryKeys.queue)).toBeUndefined()
   })
 
   it('updates a chat and writes stats and the deploy slot straight through', () => {

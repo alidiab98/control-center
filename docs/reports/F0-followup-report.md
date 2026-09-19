@@ -17,9 +17,15 @@ or adding a comment never shows up as an automation. "Today" is measured from mi
 store's clock, which is frozen in static mode.
 
 **Web.** `useAutomationsToday()` reads the list. The reconciler appends any incoming
-`timeline.added` event with `automation: true` to that cache, so the list grows live without a
-refetch. It does not seed the cache before the query has loaded, which would otherwise show a
-one-item list built from whatever happened to arrive first.
+`timeline.added` event with `automation: true` **and** dated today to that cache, so the list
+grows live without a refetch while a replayed or late event from another day stays out. The
+day is decided by a `now` parameter rather than the wall clock, so tests do not drift.
+
+While adding that check, the same class of problem turned up across the reconciler: every list
+updater used to seed an empty cache from a single event, which would leave a one-item queue or
+timeline on screen until it went stale. Lists that have not been fetched are now left alone;
+the fetch that follows contains the event anyway. Single entities, such as a task or the stats,
+are still written straight through.
 
 **Tests.** Schema accepts and rejects the flag; fixtures carry exactly three automations; the
 mock returns them oldest first and excludes earlier days; a Tracker transition is recorded as an
@@ -89,9 +95,9 @@ $ npm run test
 
 
  Test Files  13 passed (13)
-      Tests  96 passed (96)
-   Start at  14:26:00
-   Duration  817ms (environment 60%, tests 13%, transform 10%, import 9%, setup 8%, worker 1%)
+      Tests  98 passed (98)
+   Start at  14:28:37
+   Duration  834ms (environment 58%, tests 12%, transform 11%, setup 9%, import 8%, worker 1%)
 
 
 $ npm run e2e
@@ -102,23 +108,23 @@ $ npm run e2e
 
 Running 17 tests using 9 workers
 
-  ✓   8 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /deploy says it is not built yet (664ms)
-  ✓   7 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram/chat-dev-team loads its screen (663ms)
-  ✓   2 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks/ST-412 loads its screen (669ms)
-  ✓   4 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks loads its screen (662ms)
-  ✓   5 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /agents says it is not built yet (671ms)
-  ✓   1 [chromium] › e2e/tests/counters.spec.ts:23:1 › a counter falls back to a marker when its call fails (674ms)
-  ✓   9 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram loads its screen (681ms)
-  ✓   6 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › / loads its screen (691ms)
-  ✓   3 [chromium] › e2e/tests/counters.spec.ts:14:1 › sidebar counters match the fixtures (851ms)
-  ✓  10 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /search says it is not built yet (453ms)
-  ✓  11 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /reports says it is not built yet (463ms)
-  ✓  13 [chromium] › e2e/tests/navigation.spec.ts:38:3 › routes › an unknown address explains itself (472ms)
-  ✓  15 [chromium] › e2e/tests/shell.spec.ts:32:3 › app shell › shows the home top bar, inert until later milestones (497ms)
-  ✓  14 [chromium] › e2e/tests/shell.spec.ts:11:3 › app shell › renders the brand, the nav and the dev slot (525ms)
-  ✓  17 [chromium] › e2e/tests/shell.spec.ts:44:3 › app shell › is operable from the keyboard (581ms)
-  ✓  12 [chromium] › e2e/tests/navigation.spec.ts:44:3 › routes › clicking through the nav keeps the shell in place (611ms)
-  ✓  16 [chromium] › e2e/tests/shell.spec.ts:39:3 › app shell › renders the error state when a call is forced to fail (684ms)
+  ✓   8 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /deploy says it is not built yet (599ms)
+  ✓   6 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks loads its screen (613ms)
+  ✓   1 [chromium] › e2e/tests/counters.spec.ts:23:1 › a counter falls back to a marker when its call fails (614ms)
+  ✓   5 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › / loads its screen (605ms)
+  ✓   2 [chromium] › e2e/tests/counters.spec.ts:14:1 › sidebar counters match the fixtures (621ms)
+  ✓   7 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram loads its screen (715ms)
+  ✓   9 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram/chat-dev-team loads its screen (730ms)
+  ✓   4 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks/ST-412 loads its screen (728ms)
+  ✓   3 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /agents says it is not built yet (777ms)
+  ✓  13 [chromium] › e2e/tests/navigation.spec.ts:38:3 › routes › an unknown address explains itself (433ms)
+  ✓  11 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /reports says it is not built yet (437ms)
+  ✓  10 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /search says it is not built yet (440ms)
+  ✓  14 [chromium] › e2e/tests/shell.spec.ts:11:3 › app shell › renders the brand, the nav and the dev slot (487ms)
+  ✓  12 [chromium] › e2e/tests/navigation.spec.ts:44:3 › routes › clicking through the nav keeps the shell in place (531ms)
+  ✓  15 [chromium] › e2e/tests/shell.spec.ts:32:3 › app shell › shows the home top bar, inert until later milestones (465ms)
+  ✓  17 [chromium] › e2e/tests/shell.spec.ts:44:3 › app shell › is operable from the keyboard (481ms)
+  ✓  16 [chromium] › e2e/tests/shell.spec.ts:39:3 › app shell › renders the error state when a call is forced to fail (646ms)
 
   17 passed (2.2s)
 
@@ -130,23 +136,23 @@ $ CC_PORT=5199 npm run e2e
 
 Running 17 tests using 9 workers
 
-  ✓   6 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks loads its screen (556ms)
-  ✓   4 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /deploy says it is not built yet (565ms)
-  ✓   3 [chromium] › e2e/tests/counters.spec.ts:23:1 › a counter falls back to a marker when its call fails (562ms)
-  ✓   5 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram/chat-dev-team loads its screen (597ms)
-  ✓   1 [chromium] › e2e/tests/counters.spec.ts:14:1 › sidebar counters match the fixtures (599ms)
-  ✓   2 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks/ST-412 loads its screen (692ms)
-  ✓   7 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram loads its screen (732ms)
-  ✓   8 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /agents says it is not built yet (761ms)
-  ✓   9 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › / loads its screen (769ms)
-  ✓  11 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /reports says it is not built yet (404ms)
-  ✓  10 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /search says it is not built yet (419ms)
-  ✓  12 [chromium] › e2e/tests/navigation.spec.ts:38:3 › routes › an unknown address explains itself (433ms)
-  ✓  14 [chromium] › e2e/tests/shell.spec.ts:11:3 › app shell › renders the brand, the nav and the dev slot (491ms)
-  ✓  15 [chromium] › e2e/tests/shell.spec.ts:32:3 › app shell › shows the home top bar, inert until later milestones (475ms)
-  ✓  13 [chromium] › e2e/tests/navigation.spec.ts:44:3 › routes › clicking through the nav keeps the shell in place (601ms)
-  ✓  17 [chromium] › e2e/tests/shell.spec.ts:44:3 › app shell › is operable from the keyboard (472ms)
-  ✓  16 [chromium] › e2e/tests/shell.spec.ts:39:3 › app shell › renders the error state when a call is forced to fail (616ms)
+  ✓   5 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /agents says it is not built yet (590ms)
+  ✓   4 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks loads its screen (603ms)
+  ✓   8 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram/chat-dev-team loads its screen (616ms)
+  ✓   6 [chromium] › e2e/tests/counters.spec.ts:23:1 › a counter falls back to a marker when its call fails (615ms)
+  ✓   7 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /deploy says it is not built yet (617ms)
+  ✓   1 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /telegram loads its screen (694ms)
+  ✓   9 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › /tasks/ST-412 loads its screen (766ms)
+  ✓   3 [chromium] › e2e/tests/navigation.spec.ts:23:5 › routes › / loads its screen (762ms)
+  ✓   2 [chromium] › e2e/tests/counters.spec.ts:14:1 › sidebar counters match the fixtures (780ms)
+  ✓  12 [chromium] › e2e/tests/navigation.spec.ts:38:3 › routes › an unknown address explains itself (398ms)
+  ✓  10 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /search says it is not built yet (416ms)
+  ✓  11 [chromium] › e2e/tests/navigation.spec.ts:31:5 › routes › /reports says it is not built yet (413ms)
+  ✓  14 [chromium] › e2e/tests/shell.spec.ts:11:3 › app shell › renders the brand, the nav and the dev slot (478ms)
+  ✓  13 [chromium] › e2e/tests/navigation.spec.ts:44:3 › routes › clicking through the nav keeps the shell in place (510ms)
+  ✓  15 [chromium] › e2e/tests/shell.spec.ts:32:3 › app shell › shows the home top bar, inert until later milestones (496ms)
+  ✓  17 [chromium] › e2e/tests/shell.spec.ts:44:3 › app shell › is operable from the keyboard (469ms)
+  ✓  16 [chromium] › e2e/tests/shell.spec.ts:39:3 › app shell › renders the error state when a call is forced to fail (608ms)
 
   17 passed (2.2s)
 ```

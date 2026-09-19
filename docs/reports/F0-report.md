@@ -343,6 +343,9 @@ Three things had to be adjusted, none of them a version change:
 
 ## Two `shared/` changes I propose but did not make
 
+**Update, same day:** proposal 1 was approved and is now implemented on `main`. See
+`docs/reports/F0-followup-report.md`.
+
 Both are things F1 and F2 will hit early. Neither is committed (CLAUDE.md rule 4).
 
 1. **Automations today (SPEC section 8.2).** The home screen lists automations from timeline
