@@ -1,4 +1,11 @@
-import type { AgentSession, QueueItem, ServerEvent, Task, TgChat } from '@control-center/shared'
+import type {
+  AgentSession,
+  QueueItem,
+  ServerEvent,
+  Task,
+  TgChat,
+  TimelineEvent,
+} from '@control-center/shared'
 import { QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
@@ -123,6 +130,64 @@ describe('applyServerEvent', () => {
     })
 
     expect(queryClient.getQueryData<Task | null>(byKey)).toMatchObject({ key: 'ST-398' })
+  })
+
+  it('adds an incoming automation to the automations list as well as the task timeline', () => {
+    const queryClient = createQueryClient()
+    queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, [])
+    queryClient.setQueryData<TimelineEvent[]>(queryKeys.timeline('task-st-412'), [])
+
+    const automation: TimelineEvent = {
+      id: 'tl-new',
+      taskId: 'task-st-412',
+      at: NOW.toISOString(),
+      text: 'Agent wrote a new test for long exports',
+      attention: false,
+      automation: true,
+    }
+    applyServerEvent(queryClient, { type: 'timeline.added', event: automation })
+
+    expect(queryClient.getQueryData<TimelineEvent[]>(queryKeys.automationsToday)).toHaveLength(1)
+    expect(
+      queryClient.getQueryData<TimelineEvent[]>(queryKeys.timeline('task-st-412')),
+    ).toHaveLength(1)
+  })
+
+  it('keeps events a person caused out of the automations list', () => {
+    const queryClient = createQueryClient()
+    queryClient.setQueryData<TimelineEvent[]>(queryKeys.automationsToday, [])
+
+    applyServerEvent(queryClient, {
+      type: 'timeline.added',
+      event: {
+        id: 'tl-manual',
+        taskId: 'task-st-412',
+        at: NOW.toISOString(),
+        text: 'Permission allowed by you',
+        attention: false,
+        automation: false,
+      },
+    })
+
+    expect(queryClient.getQueryData<TimelineEvent[]>(queryKeys.automationsToday)).toHaveLength(0)
+  })
+
+  it('does not seed the automations list before it has been loaded', () => {
+    const queryClient = createQueryClient()
+
+    applyServerEvent(queryClient, {
+      type: 'timeline.added',
+      event: {
+        id: 'tl-early',
+        taskId: 'task-st-412',
+        at: NOW.toISOString(),
+        text: 'Tests: 41 passed',
+        attention: false,
+        automation: true,
+      },
+    })
+
+    expect(queryClient.getQueryData(queryKeys.automationsToday)).toBeUndefined()
   })
 
   it('updates a chat and writes stats and the deploy slot straight through', () => {

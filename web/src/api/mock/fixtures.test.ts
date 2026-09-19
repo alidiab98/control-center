@@ -74,10 +74,11 @@ describe('fixtures reproduce the design screenshots', () => {
     const automations = fixtures.timeline.filter((event) => event.automation)
 
     expect(automations.map((event) => event.text)).toEqual([
-      'ST-405 auto-review finished, 1 risk flagged',
       'ST-398 moved to In progress when its agent started',
+      'ST-405 auto-review finished, 1 risk flagged',
       "Standup draft ready from today's events",
     ])
+    expect(fixtures.timeline.filter((event) => !event.automation).length).toBeGreaterThan(0)
   })
 
   it('tracks 4h 12m today and reports seven agents', () => {
